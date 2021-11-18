@@ -7,15 +7,16 @@ let todayDateString = new Date().toISOString().slice(0,10);
 let date= todayDateString;
 
 class Project {
-	constructor(id, name, details, users){
+	constructor(id, date, name, description, users){
 		this.id = id;
+		this.date = date;
 		this.name = name;
-		this.details = name;
+		this.description = description;
 		this.users = users;
 	}
 }
 let pcount = 0;
-let p1 = new Project(pcount, "untitle project", "write description here");
+let p1 = new Project(pcount, date, "", "");
 
 let projectStore = writable([]);
 
@@ -25,21 +26,24 @@ onMount(async () => {
 });
 
 function createEmptyProject(){
-	return   new Project(pcount, "untitle project", "write description here");
+	return   new Project(pcount, date, "", "");
 }
 
 async function loadProjectList(){
-	let collRef = db.collection('daily-projects');
-  	let allDocs= await CollRef.get();
+	console.log("oad project list");
+	let collRef = db.collection('daily_projects');
+  	let allDocs= await collRef.get();
 	let listCopy = [];
+	console.log("allDocs:", allDocs);
 	for(const doc of allDocs.docs){
+		console.log("doc ikb", doc);
 		let docData = doc.data();
-		let docCopy = {
-			id:doc.id, 
-			date:docData.date, 
-			name:docData.name,
-			description: docData.description
-		};
+		let docCopy = new Project(
+			doc.id, 
+			docData.date, 
+			docData.name,
+			docData.description
+		);
 		listCopy.push(docCopy);
    		console.log(doc.id, '=>', doc.data());
   	}
@@ -52,7 +56,6 @@ function handleOnSubmit() {
 		date,
 		name: p1.name,
 		description: p1.description
-
 	})
 	.then(() => {
 		console.log("Document successfully written!");
@@ -94,6 +97,9 @@ function deleteDoc(id){
 		<input type="text" name="pdesc" bind:value={p1.description}  />
 		<br/>
 		<button type="submit">Add</button>
+		<div> 
+			n:{p1.name} d:{p1.description}
+		</div>
 	</form>
 	<h4>Project List</h4>
 	<div class="projectList">
